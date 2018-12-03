@@ -1,0 +1,58 @@
+SELECT  NVL(CD_AVISO_CIRURGIA, NULL) cd, to_char(NVL(CD_AVISO_CIRURGIA,NULL)) ds, 'S' sit
+  from (
+         SELECT CD_AVISO_CIRURGIA, Max(DT_INICIO_CIRURGIA) DT_INICIO_CIRURGIA 
+          FROM (
+          SELECT AC.CD_AVISO_CIRURGIA, Max(AC.DT_INICIO_CIRURGIA) DT_INICIO_CIRURGIA
+          FROM AVISO_CIRURGIA AC, CIRURGIA_AVISO CA, CIRURGIA C 
+          WHERE AC.CD_AVISO_CIRURGIA = CA.CD_AVISO_CIRURGIA 
+          AND CA.CD_CIRURGIA = C.CD_CIRURGIA
+          AND AC.CD_ATENDIMENTO = &<PAR_CD_ATENDIMENTO>
+          AND AC.TP_SITUACAO <> 'C'  
+          AND CA.SN_PRINCIPAL = 'S' 
+          AND AC.CD_AVISO_CIRURGIA NOT IN ( select CD_AVISO_CIRURGIA
+                                              from(
+                                                    select ac.cd_aviso_cirurgia, SUM( DECODE(descr.cd_descricao_aviso_cirurgia, NULL, 1, 0) + DECODE(descr.tp_situacao, 'C', 0, 1)) SOMA
+                                                      from aviso_cirurgia ac, descricao_aviso_cirurgia descr, cirurgia_aviso ca
+                                                      where ac.cd_aviso_cirurgia = ca.cd_aviso_cirurgia
+                                                      and ca.cd_descricao_aviso_cirurgia = descr.cd_descricao_aviso_cirurgia (+)
+                                                      AND AC.CD_ATENDIMENTO = &<PAR_CD_ATENDIMENTO>
+                                                      GROUP BY ac.cd_aviso_cirurgia 
+                                                    ) WHERE SOMA = 0
+                                           ) AND dt_inicio_cirurgia IS NOT NULL  
+                                             GROUP BY AC.CD_AVISO_CIRURGIA
+         ) GROUP BY CD_AVISO_CIRURGIA
+       )     
+                                                                                                                                        
+union all
+
+SELECT CD_AVISO_CIRURGIA CD, TO_CHAR(CD_AVISO_CIRURGIA) DS, 'N' SIT
+FROM AVISO_CIRURGIA
+WHERE CD_ATENDIMENTO = &<PAR_CD_ATENDIMENTO>
+AND TP_SITUACAO <> 'C' 
+and cd_aviso_cirurgia NOT IN ( SELECT CD_AVISO_CIRURGIA
+                                 FROM (
+                                        SELECT CD_AVISO_CIRURGIA, Max(DT_INICIO_CIRURGIA) DT_INICIO_CIRURGIA 
+                                          FROM (
+                                          SELECT AC.CD_AVISO_CIRURGIA, Max(AC.DT_INICIO_CIRURGIA) DT_INICIO_CIRURGIA
+                                          FROM AVISO_CIRURGIA AC, CIRURGIA_AVISO CA, CIRURGIA C 
+                                          WHERE AC.CD_AVISO_CIRURGIA = CA.CD_AVISO_CIRURGIA 
+                                          AND CA.CD_CIRURGIA = C.CD_CIRURGIA
+                                          AND AC.CD_ATENDIMENTO = &<PAR_CD_ATENDIMENTO>
+                                          AND AC.TP_SITUACAO <> 'C'  
+                                          AND CA.SN_PRINCIPAL = 'S' 
+                                          AND AC.CD_AVISO_CIRURGIA NOT IN ( select CD_AVISO_CIRURGIA
+                                                                              from(
+                                                                                    select ac.cd_aviso_cirurgia, SUM( DECODE(descr.cd_descricao_aviso_cirurgia, NULL, 1, 0) + DECODE(descr.tp_situacao, 'C', 0, 1)) SOMA
+                                                                                      from aviso_cirurgia ac, descricao_aviso_cirurgia descr, cirurgia_aviso ca
+                                                                                      where ac.cd_aviso_cirurgia = ca.cd_aviso_cirurgia
+                                                                                      and ca.cd_descricao_aviso_cirurgia = descr.cd_descricao_aviso_cirurgia (+)
+                                                                                      AND AC.CD_ATENDIMENTO = &<PAR_CD_ATENDIMENTO>
+                                                                                      GROUP BY ac.cd_aviso_cirurgia 
+                                                                                    ) WHERE SOMA = 0
+                                                                          ) AND dt_inicio_cirurgia IS NOT NULL  
+                                                                            GROUP BY AC.CD_AVISO_CIRURGIA
+                                        ) GROUP BY CD_AVISO_CIRURGIA  ) )
+                                 
+
+
+                                                                                          

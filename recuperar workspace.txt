@@ -1,0 +1,14 @@
+/*Rotina de desbloquear usuário APEX*/
+
+
+--1. Buscar id workspace
+select username from dba_users where username like 'APEX%' order by 1;
+
+
+--2. Busca os usuario admin
+select user_id,USER_NAME,ACCOUNT_LOCKED,ACCOUNT_EXPIRY,LAST_FAILED_LOGIN 
+from APEX_030200.WWV_FLOW_FND_USER where user_name = 'ADMIN' 
+
+
+--3. efetua o desbloqueio
+UPDATE  APEX_030200.WWV_FLOW_FND_USER SET account_locked ='N' where user_name = 'ADMIN'

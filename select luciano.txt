@@ -1,0 +1,205 @@
+SELECT DISTINCT 
+        cd_convenio ,
+       nm_convenio ,
+        cd_gru_pro ,
+        ds_gru_pro ,
+       cd_pro_fat       
+        DS_PRO_FAT, 
+       DT_LANCAMENTO, 
+       CD_ATENDIMENTO, 
+       CONTA, 
+        NM_PACIENTE, 
+        QT_LANCAMENTO, 
+        VL_UNITARIO_CONTA, 
+        VALOR_TOTAL_CONTA, 
+       CD_LANCAMENTO_CONTA, 
+      cd_tab_fat,
+       vl_total
+
+ FROM (
+
+SELECT convenio . cd_convenio ,
+       convenio . nm_convenio ,
+       gru_pro . cd_gru_pro ,
+       gru_pro . ds_gru_pro ,
+       pro_fat . cd_pro_fat       CD_PRO_FAT, 
+       pro_fat . ds_pro_fat       DS_PRO_FAT, 
+       itreg_fat . dt_lancamento  DT_LANCAMENTO, 
+       atendime . cd_atendimento  CD_ATENDIMENTO, 
+       reg_fat . cd_reg_fat       CONTA, 
+       paciente . nm_paciente     NM_PACIENTE, 
+       itreg_fat . qt_lancamento  QT_LANCAMENTO, 
+       itreg_fat . vl_unitario    VL_UNITARIO_CONTA, 
+       itreg_fat . vl_total_conta VALOR_TOTAL_CONTA, 
+       itreg_fat . cd_lancamento  CD_LANCAMENTO_CONTA, 
+       val_pro.cd_tab_fat,
+       val_pro.vl_total
+
+FROM   dbamv . reg_fat REG_FAT, 
+       dbamv . convenio CONVENIO, 
+       dbamv . itreg_fat ITREG_FAT, 
+       dbamv . pro_fat PRO_FAT, 
+       dbamv . atendime ATENDIME, 
+       dbamv . paciente PACIENTE, 
+       dbamv . remessa_fatura REMESSA, 
+       dbamv . fatura FATURA,
+       dbamv . gru_pro, 
+       --dbamv . empresa_convenio 
+       dbamv . val_pro
+
+WHERE pro_fat.cd_pro_fat = val_pro.cd_pro_fat
+  AND gru_pro.cd_gru_pro = pro_fat.cd_gru_pro
+  AND reg_fat.cd_reg_fat = itreg_fat.cd_reg_fat 
+  AND reg_fat.cd_atendimento = atendime.cd_atendimento 
+  AND atendime.cd_paciente = paciente.cd_paciente 
+  AND reg_fat.cd_convenio = convenio.cd_convenio 
+  AND itreg_fat.cd_pro_fat = pro_fat.cd_pro_fat 
+  AND itreg_fat.dt_lancamento  BETWEEN To_Date('13/01/2018','dd/mm/yyyy') AND To_Date('13/01/2018','dd/mm/yyyy')
+  AND Nvl (reg_fat.sn_diagno, 'N') = 'N' 
+  AND itreg_fat.sn_pertence_pacote = 'N' 
+  AND Nvl (itreg_fat.tp_pagamento, 'X') <> 'C' 
+  AND convenio.tp_convenio NOT IN ( 'H', 'A' ) 
+  AND reg_fat.cd_remessa = REMESSA.cd_remessa (+) 
+  AND REMESSA.cd_fatura = fatura.cd_fatura (+) 
+
+UNION ALL 
+
+SELECT convenio . cd_convenio ,
+       convenio . nm_convenio ,
+       gru_pro . cd_gru_pro ,
+       gru_pro . ds_gru_pro ,
+       pro_fat . cd_pro_fat       CD_PRO_FAT, 
+       pro_fat . ds_pro_fat       DS_PRO_FAT, 
+       atendime . dt_atendimento  DT_LANCAMENTO, 
+       atendime . cd_atendimento  CD_ATENDIMENTO, 
+       reg_amb . cd_reg_amb       CONTA, 
+       paciente . nm_paciente     NM_PACIENTE, 
+       itreg_amb . qt_lancamento  QT_LANCAMENTO, 
+       itreg_amb . vl_unitario    VL_UNITARIO_CONTA, 
+       itreg_amb . vl_total_conta VALOR_TOTAL_CONTA, 
+       0                          CD_LANCAMENTO_CONTA, 
+       val_pro.cd_tab_fat,
+       val_pro.vl_total
+
+FROM   dbamv . reg_amb REG_AMB, 
+       dbamv . convenio CONVENIO, 
+       dbamv . itreg_amb ITREG_AMB, 
+       dbamv . pro_fat PRO_FAT, 
+       dbamv . atendime ATENDIME, 
+       dbamv . paciente PACIENTE, 
+       dbamv . remessa_fatura REMESSA, 
+       dbamv . fatura FATURA ,
+       dbamv . gru_pro ,
+       dbamv . val_pro
+      -- dbamv . empresa_convenio 
+
+WHERE pro_fat.cd_pro_fat = val_pro.cd_pro_fat
+  AND gru_pro.cd_gru_pro = pro_fat.cd_gru_pro
+  AND reg_amb.cd_reg_amb = itreg_amb.cd_reg_amb 
+  AND itreg_amb.cd_atendimento = atendime.cd_atendimento 
+  AND atendime.cd_paciente = paciente.cd_paciente 
+  AND itreg_amb.cd_convenio = convenio.cd_convenio 
+  AND itreg_amb.cd_pro_fat = pro_fat.cd_pro_fat 
+  AND atendime.dt_atendimento  BETWEEN To_Date('13/01/2018','dd/mm/yyyy') AND To_Date('13/01/2018','dd/mm/yyyy')
+  AND Nvl (reg_amb.sn_diagno, 'N') = 'N' 
+  AND itreg_amb.sn_pertence_pacote = 'N' 
+  AND Nvl (itreg_amb.tp_pagamento, 'X') <> 'C' 
+  AND convenio.tp_convenio NOT IN ( 'H', 'A' )
+  AND reg_amb.cd_remessa = REMESSA.cd_remessa (+) 
+  AND REMESSA.cd_fatura = fatura.cd_fatura (+) 
+
+UNION ALL 
+
+SELECT convenio . cd_convenio ,
+       convenio . nm_convenio ,
+       gru_pro . cd_gru_pro ,
+       gru_pro . ds_gru_pro ,
+       pro_fat . cd_pro_fat       CD_PRO_FAT, 
+       pro_fat . ds_pro_fat       DS_PRO_FAT, 
+       itreg_fat . dt_lancamento  DT_LANCAMENTO, 
+       atendime . cd_atendimento  CD_ATENDIMENTO, 
+       reg_fat . cd_reg_fat       CONTA, 
+       paciente . nm_paciente     NM_PACIENTE, 
+       itreg_fat . qt_lancamento  QT_LANCAMENTO, 
+       itreg_fat . vl_unitario    VL_UNITARIO_CONTA, 
+       itreg_fat . vl_total_conta VALOR_TOTAL_CONTA, 
+       itreg_fat . cd_lancamento  CD_LANCAMENTO_CONTA, 
+       val_pro.cd_tab_fat,
+       val_pro.vl_total
+
+FROM   dbamv . reg_fat REG_FAT, 
+       dbamv . convenio CONVENIO, 
+       dbamv . itreg_fat ITREG_FAT, 
+       dbamv . pro_fat PRO_FAT, 
+       dbamv . atendime ATENDIME, 
+       dbamv . paciente PACIENTE, 
+       dbamv . remessa_fatura REMESSA, 
+       dbamv . fatura FATURA ,
+       dbamv . gru_pro ,
+       dbamv . val_pro
+       --dbamv . empresa_convenio 
+
+WHERE pro_fat.cd_pro_fat = val_pro.cd_pro_fat
+  AND gru_pro.cd_gru_pro = pro_fat.cd_gru_pro
+  AND reg_fat.cd_reg_fat = itreg_fat.cd_reg_fat 
+  AND reg_fat.cd_atendimento = atendime.cd_atendimento 
+  AND atendime.cd_paciente = paciente.cd_paciente 
+  AND reg_fat.cd_convenio = convenio.cd_convenio 
+  AND itreg_fat.cd_pro_fat = pro_fat.cd_pro_fat 
+  AND itreg_fat.dt_lancamento BETWEEN  To_Date('13/01/2018','dd/mm/yyyy') AND To_Date('13/01/2018','dd/mm/yyyy')
+  AND Nvl (reg_fat.sn_diagno, 'N') = 'N' 
+  AND pro_fat.sn_pacote = 'N' 
+  AND convenio.tp_convenio NOT IN ( 'H', 'A' ) 
+  AND reg_fat.cd_remessa = REMESSA.cd_remessa (+) 
+  AND REMESSA.cd_fatura = fatura.cd_fatura (+) 
+
+UNION ALL 
+
+SELECT convenio . cd_convenio ,
+       convenio . nm_convenio ,
+       gru_pro . cd_gru_pro ,
+       gru_pro . ds_gru_pro ,
+       pro_fat . cd_pro_fat       CD_PRO_FAT, 
+       pro_fat . ds_pro_fat       DS_PRO_FAT, 
+       atendime . dt_atendimento  DT_LANCAMENTO, 
+       atendime . cd_atendimento  CD_ATENDIMENTO, 
+       reg_amb . cd_reg_amb       CONTA, 
+       paciente . nm_paciente     NM_PACIENTE, 
+       itreg_amb . qt_lancamento  QT_LANCAMENTO, 
+       itreg_amb . vl_unitario    VL_UNITARIO_CONTA, 
+       itreg_amb . vl_total_conta VALOR_TOTAL_CONTA, 
+       0                          CD_LANCAMENTO_CONTA, 
+       val_pro.cd_tab_fat,
+       val_pro.vl_total
+
+FROM   dbamv . reg_amb REG_AMB, 
+       dbamv . convenio CONVENIO, 
+       dbamv . itreg_amb ITREG_AMB, 
+       dbamv . pro_fat PRO_FAT, 
+       dbamv . atendime ATENDIME, 
+       dbamv . paciente PACIENTE, 
+       dbamv . remessa_fatura REMESSA, 
+       dbamv . fatura FATURA, 
+       dbamv . gru_pro,
+       dbamv . val_pro
+       --dbamv . empresa_convenio 
+
+WHERE pro_fat.cd_pro_fat = val_pro.cd_pro_fat
+  AND gru_pro.cd_gru_pro = pro_fat.cd_gru_pro 
+  AND reg_amb.cd_reg_amb = itreg_amb.cd_reg_amb 
+  AND itreg_amb.cd_atendimento = atendime.cd_atendimento 
+  AND atendime.cd_paciente = paciente.cd_paciente 
+  AND itreg_amb.cd_convenio = convenio.cd_convenio 
+  AND itreg_amb.cd_pro_fat = pro_fat.cd_pro_fat 
+  AND atendime.dt_atendimento BETWEEN To_Date('13/01/2018','dd/mm/yyyy') AND To_Date('13/01/2018','dd/mm/yyyy')
+  AND Nvl (reg_amb.sn_diagno, 'N') = 'N' 
+  AND pro_fat.sn_pacote = 'N' 
+  AND convenio.tp_convenio NOT IN ( 'H', 'A' ) 
+  AND reg_amb.cd_remessa = REMESSA.cd_remessa (+) 
+  AND REMESSA.cd_fatura = fatura.cd_fatura (+) 
+
+ORDER  BY 1 ASC, 
+          2 ASC 
+
+) WHERE cd_tab_fat IN  (12,48)
+    AND cd_convenio IN (40,54)                          
